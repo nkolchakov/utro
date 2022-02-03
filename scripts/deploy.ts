@@ -1,25 +1,28 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-import { ethers } from "hardhat";
+import { arrayify, keccak256, solidityKeccak256 } from 'ethers/lib/utils';
+import { ethers, getUnnamedAccounts } from 'hardhat';
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  const [acc1, acc2] = await getUnnamedAccounts()
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const Utro = await ethers.getContractFactory("Utro");
+  const utro = await Utro.deploy();
 
-  await greeter.deployed();
+  await utro.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  const signer1 = await ethers.getSigner(acc1);
+
+  const answer = "europe";
+  const secret = "gg#2"
+  const message = answer + secret;
+  keccak256
+
+  console.log("Utro deployed to:", utro.address);
+
+  // check signing + verification
+  const hashedMsg = solidityKeccak256(['string'], [message])
+  const signature = await signer1.signMessage(arrayify(hashedMsg));
+
+  console.log(await utro.verify(answer, secret, acc1, signature))
 }
 
 // We recommend this pattern to be able to use async/await everywhere
