@@ -16,10 +16,10 @@ if (!env.INFURA_MAINNET_URL) {
 }
 
 const config: Config = {
-  readOnlyChainId: Mainnet.chainId,
-  readOnlyUrls: {
-    [Mainnet.chainId]: env.INFURA_MAINNET_URL
-  },
+  // readOnlyChainId: Mainnet.chainId, 
+  // readOnlyUrls: {
+  //   [Mainnet.chainId]: env.INFURA_MAINNET_URL
+  // },
 }
 
 ReactDOM.render(

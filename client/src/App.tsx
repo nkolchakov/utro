@@ -47,7 +47,7 @@ function App() {
           {connected ? discBtn : connBtn}
         </span>
         <div
-          style={{ padding: 24, minHeight: 380 }}>
+          style={{ padding: 24, minHeight: 380, display: 'flex', placeContent: 'center' }}>
           <Outlet />
         </div>
       </Content>

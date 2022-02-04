@@ -35,5 +35,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
     "moment": "^2.29.1"
+  },
+  "scripts": {
+    "deploy": "npx hardhat run scripts/signing.ts && cp ./artifacts/contracts/Utro.sol/Utro.json ./client/src/artifacts/"
   }
 }

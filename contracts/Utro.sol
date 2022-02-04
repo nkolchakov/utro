@@ -31,8 +31,9 @@ struct Schedule {
 contract Utro {
     using ECDSA for bytes32;
 
-    event ParticipantJoined(address participant, uint256 _scheduleId);
+    event ParticipantJoined(address participant, uint256 scheduleId);
 
+    uint256 public maxParticipantsPerSchedule = 10;
     uint256 public scheduleIterativeId = 0;
 
     mapping(address => uint256) public participantToScheduleId;
@@ -92,15 +93,20 @@ contract Utro {
             msg.value >= schedule.stakeRequired,
             "Provided stake is less than required for the schedule!"
         );
-        require(scheduleNameBytes.length != 0, "Schedule do not exist !");
+        require(scheduleNameBytes.length != 0, "Schedule does not exist !");
         require(
             schedule.status == ScheduleStatus.PENDING,
             "You can join schedule if it is only pending!"
+        );
+        require(
+            scheduleIdToParticipants[_scheduleId].length <
+                maxParticipantsPerSchedule
         );
         schedule.totalStakedEth += msg.value;
 
         scheduleIdToParticipants[schedule.id].push(msg.sender);
         participantToScheduleId[msg.sender] = scheduleIterativeId;
+        emit ParticipantJoined(msg.sender, schedule.id);
     }
 
     function getMessageHash(string memory _answer, string memory _secret)
