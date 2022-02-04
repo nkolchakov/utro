@@ -1,4 +1,5 @@
 import { arrayify, keccak256, solidityKeccak256 } from 'ethers/lib/utils';
+import { existsSync, mkdirSync, writeFile } from 'fs';
 import { ethers, getUnnamedAccounts } from 'hardhat';
 
 async function main() {
@@ -14,9 +15,11 @@ async function main() {
   const answer = "europe";
   const secret = "gg#2"
   const message = answer + secret;
-  keccak256
 
   console.log("Utro deployed to:", utro.address);
+
+  writeAddress(utro.address);
+
 
   // check signing + verification
   const hashedMsg = solidityKeccak256(['string'], [message])
@@ -25,6 +28,25 @@ async function main() {
   console.log(await utro.verify(answer, secret, acc1, signature))
 }
 
+
+const writeAddress = (address: string) => {
+  const dir = './client/src/contract-address.ts';
+
+  let content = `export const UTRO_CONTRACT_ADDRESS = "${address}"`;
+
+  if (!existsSync(dir)) {
+    mkdirSync(dir, {
+      recursive: true
+    })
+  };
+  writeFile(dir, content, err => {
+    if (err) {
+      console.log(err);
+    }
+    console.log('writting ', dir, content)
+    console.log('new content',)
+  })
+}
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main().catch((error) => {

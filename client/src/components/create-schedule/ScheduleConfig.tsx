@@ -19,8 +19,8 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
     };
 
     const formLayout = {
-        labelCol: { span: 12 },
-        wrapperCol: { span: 12 },
+        labelCol: { span: 4 },
+        wrapperCol: { span: 3 },
     };
 
     const formStyles: CSSProperties = {

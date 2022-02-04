@@ -23,8 +23,9 @@ struct Schedule {
     uint256 id;
     uint256 stakeRequired;
     uint256 totalStakedEth;
-    ScheduleStatus status;
     uint256 endDate;
+    uint256 hour;
+    ScheduleStatus status;
 }
 
 // Utro (bulgarian, Утро) = Morning
@@ -39,6 +40,8 @@ contract Utro {
     mapping(address => uint256) public participantToScheduleId;
 
     mapping(uint256 => Schedule) public scheduleIdToSchedule;
+
+    // 1st participant is the owner
     mapping(uint256 => address[]) public scheduleIdToParticipants;
 
     function verify(
@@ -61,10 +64,19 @@ contract Utro {
         return scheduleIdToParticipants[_scheduleId];
     }
 
+    function getSchedules() public view returns (Schedule[] memory) {
+        Schedule[] memory result = new Schedule[](scheduleIterativeId);
+        for (uint256 i = 0; i < scheduleIterativeId; i++) {
+            result[i] = scheduleIdToSchedule[i];
+        }
+        return result;
+    }
+
     function createSchedule(
         string memory _name,
         uint256 _stakeRequired,
-        uint256 _endDate
+        uint256 _endDate,
+        uint256 _hour
     ) public payable {
         require(bytes(_name).length > 0, "Name cannot be empty !");
         require(
@@ -78,7 +90,8 @@ contract Utro {
             stakeRequired: _stakeRequired,
             totalStakedEth: msg.value,
             status: ScheduleStatus.PENDING,
-            endDate: _endDate
+            endDate: _endDate,
+            hour: _hour
         });
         scheduleIdToParticipants[scheduleIterativeId].push(msg.sender);
         participantToScheduleId[msg.sender] = scheduleIterativeId;

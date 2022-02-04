@@ -1,35 +1,20 @@
-import { useContractFunction } from '@usedapp/core';
 import { Button, Steps } from 'antd';
-import { Contract, ethers, utils } from 'ethers';
 import { parseEther } from 'ethers/lib/utils';
-import { useState } from 'react';
-import compiledUtro from '../../artifacts/Utro.json';
-import { UTRO_CONTRACT_ADDRESS } from "../../constants";
-import { useUtro } from '../../useUtro';
+import { useEffect, useState } from 'react';
+import { getContract } from '../../schedule-service';
 import ReviewForm from './ReviewForm';
 import ScheduleConfig from './ScheduleConfig';
 
 const { Step } = Steps;
 
 const CreateSchedule = () => {
-    // const utroAddress = UTRO_CONTRACT_ADDRESS;
-    // const utroAbi = compiledUtro.abi;
-
-    // const utroInterface = new utils.Interface(utroAbi);
-    // const contract = new Contract(utroAddress, utroInterface);
-    // // @ts-ignore
-    // const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const signer = provider.getSigner()
-
-    // const { state, send } = useContractFunction(
-    //     contract, 'createSchedule', { signer: signer });
-
-    const { stateCreate, sendCreate } = useUtro().useCreateSchedule
 
 
     const [current, setCurrent] = useState(0);
     const [formData, setFormData] = useState<any>(null);
     const [validate, setValidate] = useState<'wait' | 'process' | 'finish' | 'error'>('error');
+
+    const contract = getContract();
 
     const steps = [
         {
@@ -54,16 +39,27 @@ const CreateSchedule = () => {
     };
 
     const deployContract = () => {
-        sendCreate(formData.name, formData.stake, formData.endDate.valueOf(), { value: parseEther(formData.stake.toString()) })
-            .then((s) => {
-                console.log(s)
+        // sendCreate(formData.name, formData.stake, formData.endDate.valueOf(), { value: parseEther(formData.stake.toString()) })
+        //     .then((s: any) => {
+        //         console.log(s)
 
-            })
+        //     })
+
+        contract
+            .createSchedule(formData.name,
+                formData.stake,
+                formData.endDate.valueOf(),
+                formData.hour.valueOf(),
+                { value: parseEther(formData.stake.toString()) }
+            )
+
+
     }
 
     return (
         <div>
             <Steps size='small'
+                style={{ width: '25%' }}
                 current={current}
                 status={validate}>
                 {steps.map(item => (

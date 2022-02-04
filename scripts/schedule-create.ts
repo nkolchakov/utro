@@ -22,6 +22,7 @@ async function main() {
     await utro.connect(signer2).joinSchedule(0, { value: stakeRequired });
     console.log(await utro.getParticipants(0))
     console.log(await (await utro.scheduleIdToSchedule(0)).totalStakedEth.toString())
+    console.log(await utro.getSchedules())
 
 }
 

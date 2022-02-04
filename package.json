@@ -37,6 +37,6 @@
     "moment": "^2.29.1"
   },
   "scripts": {
-    "deploy": "npx hardhat run scripts/signing.ts && cp ./artifacts/contracts/Utro.sol/Utro.json ./client/src/artifacts/"
+    "deploy": "pwd && npx hardhat run scripts/signing.ts && cp ./artifacts/contracts/Utro.sol/Utro.json ./client/src/artifacts/"
   }
 }
