@@ -1,15 +1,14 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-struct Schedule {
-    uint256 scheduleId;
-    uint256 stakedEth;
-    uint256 periodDays;
-    address[] participants;
+enum ScheduleStatus {
+    PENDING,
+    ACTIVE,
+    CLOSED
 }
 
 struct AnswerData {
@@ -19,13 +18,27 @@ struct AnswerData {
     bytes32[] answers;
 }
 
+struct Schedule {
+    string name;
+    uint256 id;
+    uint256 stakeRequired;
+    uint256 totalStakedEth;
+    ScheduleStatus status;
+    uint256 endDate;
+}
+
 // Utro (bulgarian, Утро) = Morning
 contract Utro {
     using ECDSA for bytes32;
-    uint256 public scheduleId = 0;
 
-    mapping(address => Schedule) public participantToScheduleId;
+    event ParticipantJoined(address participant, uint256 _scheduleId);
+
+    uint256 public scheduleIterativeId = 0;
+
+    mapping(address => uint256) public participantToScheduleId;
+
     mapping(uint256 => Schedule) public scheduleIdToSchedule;
+    mapping(uint256 => address[]) public scheduleIdToParticipants;
 
     function verify(
         string memory _answer,
@@ -37,6 +50,57 @@ contract Utro {
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
         return ethSignedMessageHash.recover(_signature) == _signer;
+    }
+
+    function getParticipants(uint256 _scheduleId)
+        public
+        view
+        returns (address[] memory)
+    {
+        return scheduleIdToParticipants[_scheduleId];
+    }
+
+    function createSchedule(
+        string memory _name,
+        uint256 _stakeRequired,
+        uint256 _endDate
+    ) public payable {
+        require(bytes(_name).length > 0, "Name cannot be empty !");
+        require(
+            msg.value >= _stakeRequired,
+            "Provided stake is less than the required for the schedule!"
+        );
+
+        scheduleIdToSchedule[scheduleIterativeId] = Schedule({
+            name: _name,
+            id: scheduleIterativeId,
+            stakeRequired: _stakeRequired,
+            totalStakedEth: msg.value,
+            status: ScheduleStatus.PENDING,
+            endDate: _endDate
+        });
+        scheduleIdToParticipants[scheduleIterativeId].push(msg.sender);
+        participantToScheduleId[msg.sender] = scheduleIterativeId;
+
+        scheduleIterativeId++;
+    }
+
+    function joinSchedule(uint256 _scheduleId) public payable {
+        Schedule storage schedule = scheduleIdToSchedule[_scheduleId];
+        bytes memory scheduleNameBytes = bytes(schedule.name);
+        require(
+            msg.value >= schedule.stakeRequired,
+            "Provided stake is less than required for the schedule!"
+        );
+        require(scheduleNameBytes.length != 0, "Schedule do not exist !");
+        require(
+            schedule.status == ScheduleStatus.PENDING,
+            "You can join schedule if it is only pending!"
+        );
+        schedule.totalStakedEth += msg.value;
+
+        scheduleIdToParticipants[schedule.id].push(msg.sender);
+        participantToScheduleId[msg.sender] = scheduleIterativeId;
     }
 
     function getMessageHash(string memory _answer, string memory _secret)

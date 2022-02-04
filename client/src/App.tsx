@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import './App.css';
+import { shortenAddress, useEthers } from '@usedapp/core';
+import { Badge, Button } from "antd";
+
 
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
@@ -9,6 +12,18 @@ const { SubMenu } = Menu;
 function App() {
 
   const location = useLocation();
+
+  const { activateBrowserWallet, account, deactivate } = useEthers()
+  const [connected, setConnected] = useState(false);
+
+  const connBtn = <Button type="primary" shape="round" onClick={activateBrowserWallet} >Connect</Button>
+  const discBtn = <Button type="ghost" shape="round" danger onClick={deactivate} >Deactivate</Button>
+
+
+  useEffect(() => {
+    setConnected(!!account);
+  }, [account])
+
 
   return (
     <Layout>
@@ -27,7 +42,12 @@ function App() {
         </Menu>
       </Header>
       <Content className="site-layout" style={{ padding: '0 50px', marginTop: 64 }}>
-        <div className="site-layout-background" style={{ padding: 24, minHeight: 380 }}>
+        <span style={{ float: 'right' }}>
+          {(!!account && connected) && <Badge status='success' text={shortenAddress(account!)} />} {' '}
+          {connected ? discBtn : connBtn}
+        </span>
+        <div
+          style={{ padding: 24, minHeight: 380 }}>
           <Outlet />
         </div>
       </Content>
