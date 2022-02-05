@@ -9,7 +9,7 @@ export class ScheduleObj {
         public stakeRequired: number,
         public daysNumber: number,
         public hour: Date,
-        public activationTimestamp?: number
+        public activationDate?: Date
 
     ) {
     }
@@ -27,8 +27,13 @@ export class ScheduleObj {
             raw.status,
             raw.stakeRequired.toNumber(),
             raw.daysNumber.toNumber(),
-            moment(raw.hour.toNumber()).toDate()
+            moment(raw.hour.toNumber()).toDate(),
+            raw.activationTimestamp.toNumber() !== 0 ? moment(raw.activationTimestamp).toDate() : undefined
         )
+    }
+
+    get activationDateFormatted() {
+        return this.activationDate ? moment(this.activationDate).format('DD/MM/YY') : undefined;
     }
 
     get hourFormatted() {

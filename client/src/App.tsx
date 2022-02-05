@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import './App.css';
 import { shortenAddress, useEthers } from '@usedapp/core';
 import { Badge, Button } from "antd";
-
+import { ApiTwoTone } from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;

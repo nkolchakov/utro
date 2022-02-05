@@ -1,18 +1,21 @@
 import { CrownOutlined, ExperimentOutlined } from '@ant-design/icons';
 import { useEthers } from "@usedapp/core";
-import { Avatar, Badge, Button, List, Space } from "antd";
+import { Avatar, Badge, Button, List, message, Space } from "antd";
+import axios from 'axios';
 import { parseEther } from 'ethers/lib/utils';
 import React, { useEffect, useState } from "react";
+import { BASE_URL } from '../../constants';
 import { ScheduleObj, ScheduleStatus } from "../../interfaces";
 import { compareAddresses, getContract } from "../../schedule-service";
 
 
-const SingleSchedule = ({ schedule }: { schedule: ScheduleObj }) => {
+const SingleSchedule = ({ schedule: s }: { schedule: ScheduleObj }) => {
 
     const { account, activateBrowserWallet } = useEthers();
     const [revealed, setRevealed] = useState(false);
     const [participants, setParticipants] = useState<any>([]);
     const [extraControl, setExtraControl] = useState<React.ReactNode | null>(null);
+    const [schedule, setSchedule] = useState(s);
 
     useEffect(() => {
         setExtraControl(getExtraControl(schedule))
@@ -40,9 +43,19 @@ const SingleSchedule = ({ schedule }: { schedule: ScheduleObj }) => {
 
 
     const onJoin = (schedule: ScheduleObj) => {
-        const contract = getContract();
-        contract!.joinSchedule(schedule.id,
-            { value: parseEther(schedule.stakeRequired.toString()) });
+        getContract()
+            .joinSchedule(schedule.id,
+                { value: parseEther(schedule.stakeRequired.toString()) })
+            .then((tx: any) => {
+                message.loading('waiting for 1 confirmation...');
+                return tx.wait(1);
+            }).then((confirmedTx: any) => {
+                message.success('you are in !');
+                return axios.post(`${BASE_URL}/schedule/join`, {
+                    scheduleId: schedule.id,
+                    participant: account
+                })
+            })
     }
 
 
@@ -68,8 +81,25 @@ const SingleSchedule = ({ schedule }: { schedule: ScheduleObj }) => {
     }
 
     const onActivate = (scheduleId: number) => {
-        const contract = getContract();
-        contract.activateSchedule(scheduleId)
+        getContract()
+            .activateSchedule(scheduleId)
+            .then((tx: any) => {
+                message.loading('waiting for 1 confirmation ...');
+                return tx.wait(1)
+            }).then((confirmedTx: any) => {
+                message.success('schedule is activated !');
+                const activationEventArgs = confirmedTx.events[0].args;
+
+                const backendPromise = axios.post(`${BASE_URL}/schedule/activate`, {
+                    scheduleId: activationEventArgs.scheduleId.toNumber(),
+                    activationTimestamp: activationEventArgs.activationTimestamp.toNumber()
+                })
+
+                const fetchSchedulePromise = getContract().scheduleIdToSchedule(scheduleId);
+                return Promise.all([fetchSchedulePromise, backendPromise]);
+            }).then(([updatedRawSch, _]: any) => {
+                setSchedule(updatedRawSch);
+            })
     }
 
     const isActiveEnabled = (schedule: ScheduleObj) => {
@@ -100,6 +130,7 @@ const SingleSchedule = ({ schedule }: { schedule: ScheduleObj }) => {
                         Activate
                     </Button>
                 }
+
             </ div >}
             style={{ marginRight: '30px' }}>
             <Badge
@@ -107,6 +138,10 @@ const SingleSchedule = ({ schedule }: { schedule: ScheduleObj }) => {
                 color={schedule.statusColor}
                 style={{ fontStyle: 'italic', color: 'gray' }}
                 text={'/  ' + ScheduleStatus[schedule.status]} />
+            {
+                schedule.activationDateFormatted && <span
+                    style={{ fontStyle: 'italic', color: 'gray' }} >{', started on ' + schedule.activationDateFormatted}</span>
+            }
             <List.Item.Meta
                 avatar={<Avatar size='large'
                     src="coffee.jpg" />}

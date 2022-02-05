@@ -33,8 +33,9 @@ struct Schedule {
 contract Utro {
     using ECDSA for bytes32;
 
+    event ScheduleCreated(uint256 scheduleId, address creator);
     event ParticipantJoined(address participant, uint256 scheduleId);
-    event ScheduleActivated(uint256 scheduleId);
+    event ScheduleActivated(uint256 scheduleId, uint256 activationTimestamp);
 
     uint256 public constant maxParticipantsPerSchedule = 10;
     uint256 public scheduleIterativeId = 0;
@@ -101,6 +102,7 @@ contract Utro {
         participantToScheduleId[msg.sender] = scheduleIterativeId;
 
         scheduleIterativeId++;
+        emit ScheduleCreated(scheduleIterativeId - 1, msg.sender);
     }
 
     function joinSchedule(uint256 _scheduleId)
@@ -146,7 +148,7 @@ contract Utro {
         schedule.status = ScheduleStatus.ACTIVE;
         schedule.activationTimestamp = block.timestamp;
 
-        emit ScheduleActivated(_scheduleId);
+        emit ScheduleActivated(_scheduleId, schedule.activationTimestamp);
     }
 
     modifier scheduleExists(uint256 _scheduleId) {

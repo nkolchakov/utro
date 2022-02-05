@@ -1,12 +1,9 @@
-import { Button, DatePicker, Form, Input, InputNumber, TimePicker } from "antd";
+import { Form, Input, InputNumber, TimePicker } from "antd";
 import { CSSProperties, useEffect } from "react";
-import moment from "moment";
+import { MIN_DAYS } from "../../constants";
 
 
 const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
-
-
-
     const validateMessages = {
         required: '${label} is required!',
         types: {
@@ -35,7 +32,6 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
         })
     }
 
-    const minDays = 30;
 
     const onFinishFailed = (errorInfo: any) => {
         console.log('Failed:', errorInfo);
@@ -87,7 +83,7 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
             <Form.Item
                 name={['daysNumber']}
                 label="# of days"
-                tooltip={`Minimal period to participate is ${minDays} days`}
+                tooltip={`Minimal period to participate is ${MIN_DAYS} days`}
                 rules={[{ required: true, type: 'number', min: 30 }]}>
                 <InputNumber />
             </Form.Item>
