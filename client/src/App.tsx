@@ -51,7 +51,10 @@ function App() {
             padding: 24, minHeight: 380,
             // display: 'flex', placeContent: 'center'
           }}>
-          <Outlet />
+          {!!account ?
+            <Outlet /> :
+            <h1>Pleae connect your wallet <ApiTwoTone /></h1>
+          }
         </div>
       </Content>
       <Footer style={{ textAlign: 'center' }}>Discipline makes you free</Footer>

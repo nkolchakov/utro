@@ -15,8 +15,8 @@ async function main() {
     const signer2 = await ethers.getSigner(acc2);
 
     const stakeRequired = parseEther('0.5')
-    const endDate = moment().add(10, 'days');
-    await utro.createSchedule("test", stakeRequired, endDate.valueOf(), { value: stakeRequired });
+    const daysNumber = 32;
+    await utro.createSchedule("test", stakeRequired, daysNumber, moment().valueOf(), { value: stakeRequired });
     console.log(await utro.getParticipants(0))
 
     await utro.connect(signer2).joinSchedule(0, { value: stakeRequired });

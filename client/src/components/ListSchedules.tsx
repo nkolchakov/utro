@@ -1,17 +1,20 @@
-import { Contract, ethers, utils } from "ethers";
-import { useEffect, useState } from "react";
+import { useEthers } from "@usedapp/core";
+import { List } from "antd";
+import React, { useEffect, useState } from "react";
 import { UTRO_CONTRACT_ADDRESS } from '../contract-address';
-import compiledUtro from '../artifacts/Utro.json'
-import moment from "moment";
-import { ScheduleObj, ScheduleStatus } from "../interfaces"
-import { getContract } from "../schedule-service"
-import { Avatar, Badge, Button, Divider, List } from "antd";
+import { ScheduleObj } from "../interfaces";
+import { getContract } from "../schedule-service";
+import SingleSchedule from "./create-schedule/SingleSchedule";
 
 const ListSchedules = () => {
 
     const [scheduleList, setScheduleList] = useState<any>([]);
+    const { account } = useEthers();
+
     useEffect(() => {
+
         const contract = getContract()
+        if (!contract) throw new Error('contract is undefined')
 
         contract.getSchedules().then((rawList: any) => {
             console.log('raw ', rawList)
@@ -24,6 +27,8 @@ const ListSchedules = () => {
         })
     }, [UTRO_CONTRACT_ADDRESS])
 
+
+
     return (
         <div>
             <List
@@ -31,26 +36,7 @@ const ListSchedules = () => {
                 grid={{ gutter: 12, column: 3 }}
                 dataSource={scheduleList}
                 renderItem={(schedule: ScheduleObj) => (
-                    <List.Item extra={
-                        <div>
-                            <Button>Join</Button>
-                        </div>
-                    }>
-                        <Badge status='processing' color={schedule.statusColor} style={{ fontStyle: 'italic', color: 'gray' }} text={'/  ' + ScheduleStatus[schedule.status]} />
-                        <List.Item.Meta
-                            avatar={<Avatar size='large'
-                                src="coffee.jpg" />}
-                            title={<h3>{schedule.name}</h3>}
-                            description={
-                                <ul>
-                                    <li>Ξ {schedule.stakeRequired}</li>
-                                    <li>every day at {schedule.hourFormatted}</li>
-                                    <li>till {schedule.endDateFormatted}</li>
-                                </ul>
-                            }
-                        />
-                        {schedule.description}
-                    </List.Item>
+                    <SingleSchedule schedule={schedule} />
                 )}
             />
         </div >

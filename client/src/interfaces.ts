@@ -7,15 +7,17 @@ export class ScheduleObj {
         public name: string,
         public status: ScheduleStatus,
         public stakeRequired: number,
-        public endDate: Date,
-        public hour: Date
+        public daysNumber: number,
+        public hour: Date,
+        public activationTimestamp?: number
+
     ) {
     }
 
     get description() {
         return `Stake Ξ${this.stakeRequired} to participate in this schedule.
         It will be triggered everyday at ${this.hourFormatted}.
-        The schedule will be active till ${this.endDateFormatted} .`
+        The schedule will be active for ${this.daysNumber} days.`
     }
 
     static parse(raw: any) {
@@ -24,18 +26,15 @@ export class ScheduleObj {
             raw.name,
             raw.status,
             raw.stakeRequired.toNumber(),
-            moment(raw.endDate.toNumber()).toDate(),
+            raw.daysNumber.toNumber(),
             moment(raw.hour.toNumber()).toDate()
         )
-    }
-
-    get endDateFormatted() {
-        return moment(this.endDate).format('DD/MM/YYYY');
     }
 
     get hourFormatted() {
         return moment(this.hour).format('HH:mm:ss');
     }
+
 
     get statusColor() {
         let color = 'white';

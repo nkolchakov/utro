@@ -42,10 +42,6 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
     };
 
     const [form] = Form.useForm();
-    form.setFieldsValue({
-        "name": "room",
-        "stake": 1,
-    })
 
     useEffect(() => {
         form.setFieldsValue(formData)
@@ -75,7 +71,8 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
                 rules={[{ required: true, max: 15, whitespace: false },]}>
                 <Input />
             </Form.Item>
-            <Form.Item name={['stake']}
+            <Form.Item
+                name={['stake']}
                 label="Stake"
                 tooltip="Every participant in this room, should stake this amount"
                 rules={[{ required: true, type: 'number', min: 0.001 }]}>
@@ -87,16 +84,12 @@ const ScheduleConfig = ({ validateStep, formData, setFormData }: any) => {
                 label='Trigger hour'>
                 <TimePicker onChange={validateFields} />
             </Form.Item>
-            <Form.Item tooltip={`Minimal period to participate is ${minDays} days`}
-                name={['endDate']}
-                label="End date"
-                rules={[{ type: 'date', required: true }]}>
-                <DatePicker
-                    onChange={validateFields}
-                    disabledDate={(current) => {
-                        let customDate = moment().format("YYYY-MM-DD");
-                        return current && current < moment(customDate, "YYYY-MM-DD").add(minDays, 'days');
-                    }} />
+            <Form.Item
+                name={['daysNumber']}
+                label="# of days"
+                tooltip={`Minimal period to participate is ${minDays} days`}
+                rules={[{ required: true, type: 'number', min: 30 }]}>
+                <InputNumber />
             </Form.Item>
         </Form>
     )

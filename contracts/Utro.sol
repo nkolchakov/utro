@@ -23,7 +23,8 @@ struct Schedule {
     uint256 id;
     uint256 stakeRequired;
     uint256 totalStakedEth;
-    uint256 endDate;
+    uint256 daysNumber;
+    uint256 activationTimestamp;
     uint256 hour;
     ScheduleStatus status;
 }
@@ -33,8 +34,9 @@ contract Utro {
     using ECDSA for bytes32;
 
     event ParticipantJoined(address participant, uint256 scheduleId);
+    event ScheduleActivated(uint256 scheduleId);
 
-    uint256 public maxParticipantsPerSchedule = 10;
+    uint256 public constant maxParticipantsPerSchedule = 10;
     uint256 public scheduleIterativeId = 0;
 
     mapping(address => uint256) public participantToScheduleId;
@@ -75,7 +77,7 @@ contract Utro {
     function createSchedule(
         string memory _name,
         uint256 _stakeRequired,
-        uint256 _endDate,
+        uint256 daysNumber,
         uint256 _hour
     ) public payable {
         require(bytes(_name).length > 0, "Name cannot be empty !");
@@ -83,6 +85,7 @@ contract Utro {
             msg.value >= _stakeRequired,
             "Provided stake is less than the required for the schedule!"
         );
+        require(daysNumber >= 30, "Lowest period to participate is 30 days");
 
         scheduleIdToSchedule[scheduleIterativeId] = Schedule({
             name: _name,
@@ -90,7 +93,8 @@ contract Utro {
             stakeRequired: _stakeRequired,
             totalStakedEth: msg.value,
             status: ScheduleStatus.PENDING,
-            endDate: _endDate,
+            daysNumber: daysNumber,
+            activationTimestamp: 0,
             hour: _hour
         });
         scheduleIdToParticipants[scheduleIterativeId].push(msg.sender);
@@ -99,14 +103,16 @@ contract Utro {
         scheduleIterativeId++;
     }
 
-    function joinSchedule(uint256 _scheduleId) public payable {
+    function joinSchedule(uint256 _scheduleId)
+        public
+        payable
+        scheduleExists(_scheduleId)
+    {
         Schedule storage schedule = scheduleIdToSchedule[_scheduleId];
-        bytes memory scheduleNameBytes = bytes(schedule.name);
         require(
             msg.value >= schedule.stakeRequired,
             "Provided stake is less than required for the schedule!"
         );
-        require(scheduleNameBytes.length != 0, "Schedule does not exist !");
         require(
             schedule.status == ScheduleStatus.PENDING,
             "You can join schedule if it is only pending!"
@@ -120,6 +126,34 @@ contract Utro {
         scheduleIdToParticipants[schedule.id].push(msg.sender);
         participantToScheduleId[msg.sender] = scheduleIterativeId;
         emit ParticipantJoined(msg.sender, schedule.id);
+    }
+
+    function activateSchedule(uint256 _scheduleId)
+        public
+        scheduleExists(_scheduleId)
+    {
+        Schedule storage schedule = scheduleIdToSchedule[_scheduleId];
+        require(
+            scheduleIdToParticipants[_scheduleId].length > 1,
+            "Cannot activate a schedule w/ less than 2 peeople !"
+        );
+        require(
+            schedule.status != ScheduleStatus.ACTIVE ||
+                schedule.status != ScheduleStatus.CLOSED,
+            "Only schedules with PENDING status can be activated !"
+        );
+
+        schedule.status = ScheduleStatus.ACTIVE;
+        schedule.activationTimestamp = block.timestamp;
+
+        emit ScheduleActivated(_scheduleId);
+    }
+
+    modifier scheduleExists(uint256 _scheduleId) {
+        Schedule memory schedule = scheduleIdToSchedule[_scheduleId];
+        bytes memory scheduleNameBytes = bytes(schedule.name);
+        require(scheduleNameBytes.length != 0, "Schedule does not exist !");
+        _;
     }
 
     function getMessageHash(string memory _answer, string memory _secret)

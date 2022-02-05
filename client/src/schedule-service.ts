@@ -1,5 +1,4 @@
 import { Contract, ethers, utils } from "ethers";
-import { useEffect, useState } from "react";
 import { UTRO_CONTRACT_ADDRESS } from './contract-address';
 import compiledUtro from './artifacts/Utro.json'
 
@@ -16,4 +15,9 @@ export const getContract = () => {
     const contract = new Contract(utroAddress, utroInterface, signer);
 
     return contract;
+}
+
+export const compareAddresses = (a1: string, a2: string) => {
+    if (!a1 || !a2) { return false; }
+    return a1.toLowerCase() === a2.toLowerCase();
 }

@@ -21,7 +21,8 @@ const CreateSchedule = () => {
             title: 'Configure',
             component: <ScheduleConfig
                 formData={formData}
-                validateStep={(res: 'wait' | 'process' | 'finish' | 'error') => setValidate(res)} setFormData={setFormData} />
+                validateStep={(res: 'wait' | 'process' | 'finish' | 'error') => setValidate(res)}
+                setFormData={setFormData} />
         },
         {
             title: 'Stake',
@@ -38,17 +39,12 @@ const CreateSchedule = () => {
         setCurrent(current - 1);
     };
 
-    const deployContract = () => {
-        // sendCreate(formData.name, formData.stake, formData.endDate.valueOf(), { value: parseEther(formData.stake.toString()) })
-        //     .then((s: any) => {
-        //         console.log(s)
-
-        //     })
-
+    const onScheduleCreate = () => {
         contract
-            .createSchedule(formData.name,
+            .createSchedule(
+                formData.name,
                 formData.stake,
-                formData.endDate.valueOf(),
+                formData.daysNumber,
                 formData.hour.valueOf(),
                 { value: parseEther(formData.stake.toString()) }
             )
@@ -76,7 +72,7 @@ const CreateSchedule = () => {
                 {current === steps.length - 1 && (
                     <Button type="primary" style={{ background: '#cf5f14', borderColor: '#cf5f14', color: 'whitesmoke' }}
                         // onClick={() => message.success('Processing complete!')}
-                        onClick={deployContract}
+                        onClick={onScheduleCreate}
                     >
                         Sign
                     </Button>
