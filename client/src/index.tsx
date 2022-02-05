@@ -29,7 +29,7 @@ ReactDOM.render(
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<App />} >
-            <Route path='/create' element={<CreateSchedule />} />
+            <Route index element={<CreateSchedule />} />
             <Route path='/list' element={<ListSchedules />} />
             <Route path='/morning' element={<ScheduleQuiz />} />
             <Route path="*" element={<NoMatch />} />

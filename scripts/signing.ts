@@ -25,7 +25,7 @@ async function main() {
   const hashedMsg = solidityKeccak256(['string'], [message])
   const signature = await signer1.signMessage(arrayify(hashedMsg));
 
-  console.log(await utro.verify(answer, secret, acc1, signature))
+  // console.log(await utro.verify(answer, secret, acc1, signature))
 }
 
 

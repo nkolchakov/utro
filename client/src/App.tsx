@@ -30,8 +30,8 @@ function App() {
       <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: 'white' }}>
         <div className="logo" />
         <Menu selectedKeys={[location.pathname]} mode="horizontal">
-          <Menu.Item key="/create">
-            <Link to='/create'>Create</Link>
+          <Menu.Item key="/">
+            <Link to='/'>Create</Link>
           </Menu.Item>
           <Menu.Item key="/list">
             <Link to='/list'>Schedules</Link>

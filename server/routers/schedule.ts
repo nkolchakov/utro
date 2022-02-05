@@ -8,7 +8,7 @@ import moment from "moment";
 const scheduleRouter = express.Router();
 
 scheduleRouter.post('/', async (req: Request, res: Response) => {
-    const newSchedule = req.body;
+    const { participantOrder, newSchedule } = req.body;
     console.log(newSchedule);
     const creatorAddress = newSchedule.participants[0];
     if (!creatorAddress) {
@@ -19,7 +19,8 @@ scheduleRouter.post('/', async (req: Request, res: Response) => {
 
     if (!creator) {
         creator = await Participant.create({
-            _id: creatorAddress
+            _id: creatorAddress,
+            participantOrder
         });
     }
 
@@ -52,7 +53,7 @@ scheduleRouter.post('/join', [
     body('scheduleId').not().isEmpty().withMessage('Schedule id not provided !'),
     body('participant').not().isEmpty().withMessage('Participant address not provided !'),
 ], async (req: Request, res: Response) => {
-    const { scheduleId, participant } = req.body;
+    const { scheduleId, participant, participantOrder } = req.body;
 
     const schedule = await Schedule.findById(scheduleId);
     if (!schedule) {
@@ -63,7 +64,8 @@ scheduleRouter.post('/join', [
     if (!p) {
         p = await Participant.create({
             _id: participant,
-            schedule: schedule._id
+            schedule: schedule._id,
+            participantOrder
         });
     }
     schedule.participants.push(p);

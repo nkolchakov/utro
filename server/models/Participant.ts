@@ -7,6 +7,10 @@ const participantSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.String,
             required: true,
         },
+        participantOrder: {
+            type: mongoose.Schema.Types.Number,
+            required: true
+        },
         schedule: {
             type: mongoose.Schema.Types.Number,
             ref: 'Schedule'

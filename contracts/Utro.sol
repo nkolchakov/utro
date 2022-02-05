@@ -33,12 +33,26 @@ struct Schedule {
 contract Utro {
     using ECDSA for bytes32;
 
-    event ScheduleCreated(uint256 scheduleId, address creator);
-    event ParticipantJoined(address participant, uint256 scheduleId);
+    event ScheduleCreated(
+        uint256 scheduleId,
+        address creator,
+        uint256 participantOrder
+    );
+    event ParticipantJoined(
+        address participant,
+        uint256 scheduleId,
+        uint256 participantOrder
+    );
     event ScheduleActivated(uint256 scheduleId, uint256 activationTimestamp);
 
     uint256 public constant maxParticipantsPerSchedule = 10;
     uint256 public scheduleIterativeId = 0;
+
+    /* Providing the participants from each schedule after the quiz,
+    they will be sorted when queried from the helping db, based on this counter
+    order is important to match them with this original array of participants
+    */
+    uint256 public participantOrder = 0;
 
     mapping(address => uint256) public participantToScheduleId;
 
@@ -47,7 +61,13 @@ contract Utro {
     // 1st participant is the owner
     mapping(uint256 => address[]) public scheduleIdToParticipants;
 
-    function verify(
+    //TODO: check if same person joins multiple times
+
+    // function dailyCheck() {
+    //     // participants
+    // }
+
+    function verifySignature(
         string memory _answer,
         string memory _secret,
         address _signer,
@@ -102,7 +122,12 @@ contract Utro {
         participantToScheduleId[msg.sender] = scheduleIterativeId;
 
         scheduleIterativeId++;
-        emit ScheduleCreated(scheduleIterativeId - 1, msg.sender);
+        participantOrder++;
+        emit ScheduleCreated(
+            scheduleIterativeId - 1,
+            msg.sender,
+            participantOrder - 1
+        );
     }
 
     function joinSchedule(uint256 _scheduleId)
@@ -126,8 +151,9 @@ contract Utro {
         schedule.totalStakedEth += msg.value;
 
         scheduleIdToParticipants[schedule.id].push(msg.sender);
-        participantToScheduleId[msg.sender] = scheduleIterativeId;
-        emit ParticipantJoined(msg.sender, schedule.id);
+        participantToScheduleId[msg.sender] = schedule.id;
+        participantOrder++;
+        emit ParticipantJoined(msg.sender, schedule.id, participantOrder - 1);
     }
 
     function activateSchedule(uint256 _scheduleId)

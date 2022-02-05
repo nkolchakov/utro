@@ -41,7 +41,6 @@ const SingleSchedule = ({ schedule: s }: { schedule: ScheduleObj }) => {
     }
 
 
-
     const onJoin = (schedule: ScheduleObj) => {
         getContract()
             .joinSchedule(schedule.id,
@@ -51,9 +50,11 @@ const SingleSchedule = ({ schedule: s }: { schedule: ScheduleObj }) => {
                 return tx.wait(1);
             }).then((confirmedTx: any) => {
                 message.success('you are in !');
+                const joiningEventArgs = confirmedTx.events[0].args;
                 return axios.post(`${BASE_URL}/schedule/join`, {
                     scheduleId: schedule.id,
-                    participant: account
+                    participant: account,
+                    participantOrder: joiningEventArgs.participantOrder.toNumber()
                 })
             })
     }
@@ -145,7 +146,7 @@ const SingleSchedule = ({ schedule: s }: { schedule: ScheduleObj }) => {
             <List.Item.Meta
                 avatar={<Avatar size='large'
                     src="coffee.jpg" />}
-                title={<h3>{schedule.name}</h3>}
+                title={schedule.name}
                 description={
                     <ul>
                         {revealed && <li>👤{participants.length}</li>}

@@ -61,17 +61,20 @@ const CreateSchedule = () => {
                 console.log('tx confirmed ', confirmedTx)
                 const creationEventArgs = confirmedTx.events[0].args;
                 message.success('Room created');
-
+                const data = {
+                    newSchedule: {
+                        _id: creationEventArgs.scheduleId.toNumber(),
+                        participants: [
+                            creationEventArgs.creator
+                        ],
+                        status: ScheduleStatus.pending,
+                        hour: formData.hour,
+                        daysNumber: formData.daysNumber
+                    },
+                    participantOrder: creationEventArgs.participantOrder.toNumber(),
+                }
                 // the recurring scheduling logic will be performed back-end
-                return axios.post(`${BASE_URL}/schedule`, {
-                    _id: creationEventArgs.scheduleId.toNumber(),
-                    participants: [
-                        creationEventArgs.creator
-                    ],
-                    status: ScheduleStatus.pending,
-                    hour: formData.hour,
-                    daysNumber: formData.daysNumber
-                })
+                return axios.post(`${BASE_URL}/schedule`, data)
             }).then(() => { navigate('/list') });
     }
 
@@ -88,7 +91,9 @@ const CreateSchedule = () => {
             <div className="steps-content">{steps[current].component}</div>
             <div className="steps-action">
                 {current < steps.length - 1 && (
-                    <Button disabled={validate === 'error'} type="primary" onClick={() => next()}>
+                    <Button disabled={validate === 'error'}
+                        type="primary"
+                        onClick={() => next()}>
                         Next
                     </Button>
                 )}
