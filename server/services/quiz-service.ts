@@ -3,7 +3,22 @@
 import compiledUtro from "../../artifacts/contracts/Utro.sol/Utro.json"
 import { Contract, utils } from 'ethers';
 import { UTRO_CONTRACT_ADDRESS } from "../../client/src/contract-address";
+import { Participant } from "../models/Participant";
 
+
+const processDailyCheck = async (scheduleId: number, currentQuizCache: any) => {
+    const sortedParticipants =
+        await Participant.find({ schedule: scheduleId })
+            .sort({ participantOrder: 'asc' })
+
+    // send for verification participant[] w/ the parameters from the signature
+
+    // const parsedData: {
+
+    // };
+
+    getContract()
+}
 
 const generateAlgebra = () => {
     const a = getRandomInt(0, 25);
@@ -36,4 +51,4 @@ const getContract = () => {
 }
 
 
-export { generateAlgebra, getRandomInt, getContract };
+export { processDailyCheck, generateAlgebra, getRandomInt, getContract };

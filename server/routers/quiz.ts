@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { generateAlgebra, getContract, getRandomInt } from "../services/quiz-service";
+import { generateAlgebra, getContract, getRandomInt, processDailyCheck } from "../services/quiz-service";
 
 const quizRouter = express.Router();
 
@@ -56,12 +56,17 @@ quizRouter.post('/', async (req: Request, res: Response) => {
 
 quizRouter.get('/test-trigger', async (req: Request, res: Response) => {
     console.log('triggered');
+    const { scheduleId } = req.body;
 
+    if (scheduleId === undefined) {
+        return res.status(400).send('scheduleId is undefined');
+    }
     // collect and send signatures + asnwers + game keys to the contract
     // contract will hash the same message and verify they are signed from the right accounts
     // if valid the person survives the day
     // otherwhise his take is slashed and 90% shared to others, 10% to treasury
 
+    await processDailyCheck(scheduleId, currentQuizCache);
 
     res.status(200).send(currentQuizCache);
 })

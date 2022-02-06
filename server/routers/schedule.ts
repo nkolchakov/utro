@@ -1,9 +1,8 @@
 import express, { Request, Response } from "express";
-import { userInfo } from "os";
-import { Participant } from "../models/Participant";
-import { Schedule, ScheduleStatus } from "../models/Schedule";
 import { body } from 'express-validator';
 import moment from "moment";
+import { Participant } from "../models/Participant";
+import { Schedule, ScheduleStatus } from "../models/Schedule";
 
 const scheduleRouter = express.Router();
 
@@ -73,5 +72,20 @@ scheduleRouter.post('/join', [
 
     return res.status(200).send(schedule.participants);
 })
+
+
+scheduleRouter.get('/:scheduleId/participants',
+    async (req: Request, res: Response) => {
+        const { scheduleId } = req.params;
+
+        // get participants in the order of joining in the contract
+        // based on the joining in the Contract, since transactions are 
+        // syncrounous
+        const sortedParticipants =
+            await Participant.find({ schedule: scheduleId })
+                .sort({ participantOrder: 'asc' })
+
+        res.send(sortedParticipants);
+    });
 
 export default scheduleRouter;
