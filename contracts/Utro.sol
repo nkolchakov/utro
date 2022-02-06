@@ -44,6 +44,8 @@ contract Utro {
         uint256 participantOrder
     );
     event ScheduleActivated(uint256 scheduleId, uint256 activationTimestamp);
+    event Slashed(uint256 scheduleId, address participant);
+    event Payback(uint256 scheduleId, address participant, uint256 value);
 
     event debugParams(string str, AnswerData data);
 
@@ -138,6 +140,13 @@ contract Utro {
                     (bool success, ) = payable(
                         scheduleIdToParticipants[_scheduleId][i]
                     ).call{value: refundPerPerson}("");
+                    if (success) {
+                        emit Payback(
+                            _scheduleId,
+                            scheduleIdToParticipants[_scheduleId][i],
+                            refundPerPerson
+                        );
+                    }
                 }
             }
 
@@ -155,6 +164,10 @@ contract Utro {
             // already been slashed !
             return;
         }
+        emit Slashed(
+            _scheduleId,
+            scheduleIdToParticipants[_scheduleId][_participantIndex]
+        );
         scheduleIdToParticipants[_scheduleId][_participantIndex] = address(0);
         scheduleIdToSurvivorsCount[_scheduleId]--;
     }
@@ -181,9 +194,10 @@ contract Utro {
     }
 
     function getSchedules() public view returns (Schedule[] memory) {
-        Schedule[] memory result = new Schedule[](scheduleIterativeId);
-        for (uint256 i = 0; i < scheduleIterativeId; i++) {
-            result[i] = scheduleIdToSchedule[i];
+        // there is no schedule with id 0, it started from
+        Schedule[] memory result = new Schedule[](scheduleIterativeId - 1);
+        for (uint256 i = 1; i < scheduleIterativeId; i++) {
+            result[i - 1] = scheduleIdToSchedule[i];
         }
         return result;
     }
