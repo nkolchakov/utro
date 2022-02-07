@@ -6,11 +6,14 @@ export enum ScheduleStatus {
     CLOSED
 }
 
+
+
 // for lack of time, omit more complex checks
 const scheduleSchema = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.Number,
         required: true,
+        default: 1
     },
     participants: [{
         type: mongoose.Schema.Types.String,

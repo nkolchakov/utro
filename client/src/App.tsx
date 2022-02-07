@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import './App.css';
-import { shortenAddress, useEthers } from '@usedapp/core';
+import { shortenAddress, useEtherBalance, useEthers } from '@usedapp/core';
 import { Badge, Button } from "antd";
 import { ApiTwoTone } from '@ant-design/icons';
+import { formatEther, parseEther } from 'ethers/lib/utils';
+import { ethers } from 'ethers';
+import { getContract, getProvider } from './schedule-service';
 
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
@@ -15,6 +18,7 @@ function App() {
 
   const { activateBrowserWallet, account, deactivate } = useEthers()
   const [connected, setConnected] = useState(false);
+  const [etherBalance, setEtherBalance] = useState<any>(0);
 
   const connBtn = <Button type="primary" shape="round" onClick={activateBrowserWallet} >Connect</Button>
   const discBtn = <Button type="ghost" shape="round" danger onClick={deactivate} >Deactivate</Button>
@@ -22,6 +26,20 @@ function App() {
 
   useEffect(() => {
     setConnected(!!account);
+    const contract = getContract();
+    //@ts-ignore
+    let provider = getProvider();
+    let handler: any = provider.on('block', () => {
+      if (!!account) {
+        provider.getBalance(account)
+          .then((bal: any) => {
+            console.log(bal);
+            const parsed: number = +ethers.utils.formatEther(bal);
+            setEtherBalance(parsed.toFixed(2))
+          })
+      }
+    })
+    return () => { handler = null }
   }, [account])
 
 
@@ -43,7 +61,10 @@ function App() {
       </Header>
       <Content className="site-layout" style={{ padding: '0 50px', marginTop: 64 }}>
         <span style={{ float: 'right' }}>
-          {(!!account && connected) && <Badge status='success' text={shortenAddress(account!)} />} {' '}
+          {(!!account && connected) && <span>
+            {<span>Ξ {etherBalance?.toString()}{' / '}</span>}
+            <Badge status='success' text={shortenAddress(account!)} />
+          </span>} {' '}
           {connected ? discBtn : connBtn}
         </span>
         <div

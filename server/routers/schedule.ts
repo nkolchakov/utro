@@ -22,6 +22,7 @@ scheduleRouter.post('/', async (req: Request, res: Response) => {
             participantOrder
         });
     }
+    creator.participantOrder = participantOrder;
 
     const schedule = await Schedule.create(newSchedule);
     await schedule.save();
@@ -67,6 +68,8 @@ scheduleRouter.post('/join', [
             participantOrder
         });
     }
+    p.participantOrder = participantOrder;
+    await p.save();
     schedule.participants.push(p);
     await schedule.save();
 

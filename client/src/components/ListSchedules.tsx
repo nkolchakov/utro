@@ -3,7 +3,7 @@ import { List } from "antd";
 import React, { useEffect, useState } from "react";
 import { UTRO_CONTRACT_ADDRESS } from '../contract-address';
 import { ScheduleObj } from "../interfaces";
-import { getContract } from "../schedule-service";
+import { getContract, getProvider } from "../schedule-service";
 import SingleSchedule from "./create-schedule/SingleSchedule";
 
 const ListSchedules = () => {
@@ -15,16 +15,31 @@ const ListSchedules = () => {
 
         const contract = getContract()
         if (!contract) throw new Error('contract is undefined')
+        contract.getSchedules()
+            .then((rawList: any) => {
+                console.log('raw ', rawList)
+                const parsedList = rawList
+                    .map((rawSchedule: any) => {
+                        let parsedSchedule = ScheduleObj.parse(rawSchedule);
+                        return parsedSchedule;
+                    }).filter((s: ScheduleObj) => s.id > 0)
+                setScheduleList(parsedList)
+            });
+        // const provider = getProvider();
 
-        contract.getSchedules().then((rawList: any) => {
-            console.log('raw ', rawList)
-            const parsedList = rawList.map((rawSchedule: any) => {
-                let parsedSchedule = ScheduleObj.parse(rawSchedule);
-                return parsedSchedule;
-            })
-            setScheduleList(parsedList)
-            console.log(parsedList)
-        })
+        // let handler: any = provider.on('block', () => {
+        //     contract.getSchedules()
+        //         .then((rawList: any) => {
+        //             console.log('raw ', rawList)
+        //             const parsedList = rawList
+        //                 .map((rawSchedule: any) => {
+        //                     let parsedSchedule = ScheduleObj.parse(rawSchedule);
+        //                     return parsedSchedule;
+        //                 }).filter((s: ScheduleObj) => s.id > 0)
+        //             setScheduleList(parsedList)
+        //             console.log(parsedList)
+        //         })
+        // })
     }, [UTRO_CONTRACT_ADDRESS])
 
 
@@ -33,7 +48,7 @@ const ListSchedules = () => {
         <div>
             <List
                 itemLayout="horizontal"
-                grid={{ gutter: 12, column: 3 }}
+                grid={{ gutter: 12, column: 2 }}
                 dataSource={scheduleList}
                 renderItem={(schedule: ScheduleObj) => (
                     <SingleSchedule schedule={schedule} />

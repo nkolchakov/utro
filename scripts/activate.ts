@@ -53,17 +53,17 @@ async function main() {
     const gk = '12345';
 
     const signatures: any = [
-        await getSignature(acc2, a1, a2, gk),
+        // await getSignature(acc2, a1, a2, gk),
         await getSignature(acc3, a1, a2, gk),
-        await getSignature(acc4, a1, a2, gk),
+        // await getSignature(acc4, a1, a2, gk),
     ];
 
     const answerData = {
-        participants: [acc2, acc3, acc4],
+        participants: [acc3],
         signatures: signatures, // [s1, s2, s3]
-        answers1: [a1, a1, a1],
-        answers2: [a2, a2, a2],
-        gameKeys: [gk, gk, gk]
+        answers1: [a1],
+        answers2: [a2],
+        gameKeys: [gk]
     };
     console.log('answerData \n', answerData)
     // test signature logic

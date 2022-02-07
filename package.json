@@ -37,6 +37,6 @@
     "moment": "^2.29.1"
   },
   "scripts": {
-    "deploy": "pwd && npx hardhat run scripts/signing.ts && cp ./artifacts/contracts/Utro.sol/Utro.json ./client/src/artifacts/"
+    "deploy": "mongo utrodb --eval 'db.participants.drop()' && mongo utrodb --eval 'db.schedules.drop()' && npx hardhat run scripts/signing.ts && cp ./artifacts/contracts/Utro.sol/Utro.json ./client/src/artifacts/"
   }
 }

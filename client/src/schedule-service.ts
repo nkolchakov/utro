@@ -8,13 +8,18 @@ export const getContract = () => {
     const utroAbi = compiledUtro.abi;
 
     const utroInterface = new utils.Interface(utroAbi);
-    //  @ts-ignore
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const provider = getProvider();
 
     const signer = provider.getSigner()
     const contract = new Contract(utroAddress, utroInterface, signer);
 
     return contract;
+}
+
+export const getProvider = () => {
+    //  @ts-ignore
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    return provider;
 }
 
 export const compareAddresses = (a1: string, a2: string) => {

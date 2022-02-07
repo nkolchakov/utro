@@ -6,12 +6,12 @@ import { arrayify, solidityKeccak256 } from "ethers/lib/utils";
 import { useEffect } from "react";
 import { useState } from "react";
 import { BASE_URL } from "../constants";
-import { getContract } from "../schedule-service";
+import { getContract, getProvider } from "../schedule-service";
 
 const ScheduleQuiz = () => {
-    const [first, setFirst] = useState<any>({});
-    const [second, setSecond] = useState(100);
-    const [gameKey, setGameKey] = useState(0);
+    const [first, setFirst] = useState<any>('');
+    const [second, setSecond] = useState<any>(100);
+    const [gameKey, setGameKey] = useState<any>('');
     const [scheduleId, setScheduleId] = useState<number | null>(null);
 
     const [sliderBelowGoal, setSliderBelowGoal] = useState(0);
@@ -23,7 +23,9 @@ const ScheduleQuiz = () => {
         getContract()
             .participantToScheduleId(account)
             .then((id: BigNumber) => {
-                setScheduleId(id.toNumber())
+                if (id.toString() !== '0') {
+                    setScheduleId(id.toNumber())
+                }
             })
     }, [account])
 
@@ -33,18 +35,18 @@ const ScheduleQuiz = () => {
                 const { algebricTask, sliderTask, gameKey } = res.data;
                 setSliderBelowGoal(sliderTask)
                 setArithmetic(algebricTask)
-                setGameKey(gameKey)
+                setGameKey(gameKey.toString())
             })
 
     }, [scheduleId])
 
     const onSign = async () => {
-        // @ts-ignore
-        let provider = new ethers.providers.Web3Provider(window.ethereum)
+        let provider = getProvider();
         const signer = provider.getSigner();
+        console.log('signer ', await signer.getAddress())
 
-        const msg = first + second + gameKey;
-        const hashedMsg = solidityKeccak256(['string'], [msg]);
+        const hashedMsg = solidityKeccak256(['string', 'string', 'string'],
+            [first, second, gameKey]);
 
         const signature = await signer.signMessage(arrayify(hashedMsg));
         const data = {
@@ -61,7 +63,7 @@ const ScheduleQuiz = () => {
 
     const onTrigger = () => {
         // testing mechanism to simulate when quiz time elapses
-        axios.get(`${BASE_URL}/quiz/test-trigger`);
+        axios.get(`${BASE_URL}/quiz/test-trigger/${scheduleId}`);
     }
 
     return (
@@ -69,7 +71,7 @@ const ScheduleQuiz = () => {
             <span> 'countdown ...'</span> :
             <div>
                 <Input
-                    onChange={(e: any) => setFirst(parseInt(e.target.value))}
+                    onChange={(e: any) => setFirst(e.target.value.toString())}
                     style={{ width: '200px' }}
                     size="large"
                     type={"number"}
@@ -83,7 +85,7 @@ const ScheduleQuiz = () => {
                     </h3>
                     <Slider
                         tooltipPlacement={"bottom"}
-                        onChange={(value) => setSecond(value)}
+                        onChange={(value) => setSecond(value.toString())}
                         style={{ maxWidth: '500px' }}
                         defaultValue={second} />
                 </div>

@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import quizRouter from './routers/quiz';
 import scheduleRouter from './routers/schedule';
+import 'dotenv/config'
 
 const PORT = 8000;
 

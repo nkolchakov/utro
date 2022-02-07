@@ -56,7 +56,7 @@ contract Utro {
     they will be sorted when queried from the helping db, based on this counter
     order is important to match them with this original array of participants
     */
-    uint256 public participantOrder = 0;
+    mapping(uint256 => uint256) public scheduleIdToParticipantOrder;
 
     // 1st participant is the owner
     mapping(uint256 => address[]) public scheduleIdToParticipants;
@@ -229,11 +229,11 @@ contract Utro {
         participantToScheduleId[msg.sender] = scheduleIterativeId;
 
         scheduleIterativeId++;
-        participantOrder++;
+        scheduleIdToParticipantOrder[scheduleIterativeId]++;
         emit ScheduleCreated(
             scheduleIterativeId - 1,
             msg.sender,
-            participantOrder - 1
+            scheduleIdToParticipantOrder[scheduleIterativeId] - 1
         );
     }
 
@@ -265,8 +265,12 @@ contract Utro {
 
         scheduleIdToParticipants[schedule.id].push(msg.sender);
         participantToScheduleId[msg.sender] = schedule.id;
-        participantOrder++;
-        emit ParticipantJoined(msg.sender, schedule.id, participantOrder - 1);
+        scheduleIdToParticipantOrder[scheduleIterativeId]++;
+        emit ParticipantJoined(
+            msg.sender,
+            schedule.id,
+            scheduleIdToParticipantOrder[scheduleIterativeId] - 1
+        );
     }
 
     function activateSchedule(uint256 _scheduleId)
@@ -297,6 +301,8 @@ contract Utro {
 
         emit ScheduleActivated(_scheduleId, schedule.activationTimestamp);
     }
+
+    // TODO: Function to claim back the stakes, if the Owner, didn't activate the room in 3 days.
 
     modifier scheduleExists(uint256 _scheduleId) {
         bytes memory scheduleNameBytes = bytes(
